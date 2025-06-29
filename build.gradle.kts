@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "gg.norisk"
-version = "2.0.0-SNAPSHOT-5"
+version = "2.0.0-SNAPSHOT-10"
 description = "Powerful Discord bot Framework based on JDA for Kotlin"
 
 tasks {
@@ -35,13 +35,16 @@ java {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io/") // jda ktx
 }
 
 dependencies {
-    implementation(kotlin("stdlib", "2.2.0"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.0")
-    compileOnly("net.dv8tion:JDA:5.6.1")
+    compileOnly(kotlin("stdlib", "2.2.0"))
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    compileOnly("org.jetbrains.kotlin:kotlin-reflect:2.2.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("net.dv8tion:JDA:5.6.0")
+    compileOnly("com.github.minndevelopment:jda-ktx:0.12.0")
 }
 
 publishing {

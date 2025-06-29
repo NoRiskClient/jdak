@@ -13,7 +13,7 @@ data class CommandsBuild(
 )
 
 object JDAK {
-    fun build(init: CommandBuilder.() -> Unit): CommandsBuild {
+    private fun build(init: CommandBuilder.() -> Unit): CommandsBuild {
         val builder = CommandBuilder().apply(init)
         val commands = arrayListOf<CommandData>()
         val listener = CommandListenerBuilderImpl()

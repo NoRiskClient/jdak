@@ -10,12 +10,23 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 interface OptionsContainer {
     val options: MutableList<CommandOption>
 
-    fun<T: CommandOption> addOption(command: T): T {
+    fun <T : CommandOption> addOption(command: T): T {
         options += command
 
         return command
     }
 }
+
+inline fun <reified T : Any> OptionsContainer.option(
+    name: String,
+    description: String,
+    noinline init: (SerializableCommandOption<T>.() -> Unit)? = null,
+): SerializableCommandOption<T> {
+    val option = SerializableCommandOption(name, description, T::class)
+    init?.invoke(option)
+    return addOption(option)
+}
+
 
 fun OptionsContainer.option(type: OptionType, name: String, description: String) = addOption(
     CommandOption(name, description, type)
@@ -25,9 +36,11 @@ fun OptionsContainer.option(type: OptionType, name: String, description: String)
  * Not recommended, use long instead
  */
 fun OptionsContainer.int(name: String, description: String) = addOption(
-    NumberCommandOption<Long>(name, description, OptionType.INTEGER)
-        .map { it?.toInt() } as NumberCommandOption<Int>
-)
+    NumberCommandOption<Long>(
+        name,
+        description,
+        OptionType.INTEGER
+    ).map { it?.toInt() } as NumberCommandOption<Int>)
 
 /**
  * Not recommended, use long instead
@@ -47,9 +60,10 @@ fun OptionsContainer.number(name: String, description: String) = addOption(
     NumberCommandOption<Double>(name, description, OptionType.NUMBER)
 )
 
-fun OptionsContainer.number(name: String, description: String, init: NumberCommandOption<Double>.() -> Unit) = addOption(
-    NumberCommandOption<Double>(name, description, OptionType.NUMBER).apply(init)
-)
+fun OptionsContainer.number(name: String, description: String, init: NumberCommandOption<Double>.() -> Unit) =
+    addOption(
+        NumberCommandOption<Double>(name, description, OptionType.NUMBER).apply(init)
+    )
 
 fun OptionsContainer.user(name: String, description: String) = addOption(
     TypedCommandOption<User>(name, description, OptionType.USER)
@@ -59,9 +73,10 @@ fun OptionsContainer.string(name: String, description: String) = addOption(
     StringCommandOption<String>(name, description)
 )
 
-fun OptionsContainer.string(name: String, description: String, init: StringCommandOption<String>.() -> Unit) = addOption(
-    StringCommandOption<String>(name, description).apply(init)
-)
+fun OptionsContainer.string(name: String, description: String, init: StringCommandOption<String>.() -> Unit) =
+    addOption(
+        StringCommandOption<String>(name, description).apply(init)
+    )
 
 fun OptionsContainer.role(name: String, description: String) = addOption(
     TypedCommandOption<Role>(name, description, OptionType.ROLE)
@@ -79,9 +94,10 @@ fun OptionsContainer.channel(name: String, description: String) = addOption(
     ChannelCommandOption<Channel>(name, description)
 )
 
-fun OptionsContainer.channel(name: String, description: String, init: ChannelCommandOption<Channel>.() -> Unit) = addOption(
-    ChannelCommandOption<Channel>(name, description).apply(init)
-)
+fun OptionsContainer.channel(name: String, description: String, init: ChannelCommandOption<Channel>.() -> Unit) =
+    addOption(
+        ChannelCommandOption<Channel>(name, description).apply(init)
+    )
 
 fun OptionsContainer.boolean(name: String, description: String) = addOption(
     TypedCommandOption<Boolean>(name, description, OptionType.BOOLEAN)

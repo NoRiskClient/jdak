@@ -1,12 +1,26 @@
 package net.sonmoosans.jdak.command
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
+import net.dv8tion.jda.api.entities.IMentionable
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message.Attachment
+import net.dv8tion.jda.api.entities.Role
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.channel.ChannelType
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command.Choice
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.typeOf
 
 open class StringCommandOption<T: Any?>(
     name: String, description: String
@@ -31,6 +45,47 @@ open class StringCommandOption<T: Any?>(
     fun choices(vararg choices: Pair<String, String>): StringCommandOption<T> {
         this.choices += choices.map {
             Choice(it.first, it.second)
+        }
+
+        return this
+    }
+}
+
+open class SerializableCommandOption<T : Any>(
+    name: String, description: String, typeClass: KClass<T>
+): TypedCommandOption<T>(name, description, getOptionType(typeClass)) {
+    companion object {
+        private fun getOptionType(type: KClass<*>): OptionType = when (type) {
+            Long::class, Int::class -> OptionType.INTEGER
+            Double::class -> OptionType.NUMBER
+            Boolean::class -> OptionType.BOOLEAN
+            User::class, Member::class -> OptionType.USER
+            Role::class -> OptionType.ROLE
+            Attachment::class -> OptionType.ATTACHMENT
+            Channel::class -> OptionType.CHANNEL
+            IMentionable::class -> OptionType.MENTIONABLE
+            GuildChannelUnion::class -> OptionType.CHANNEL
+            String::class -> OptionType.STRING
+            else -> OptionType.STRING
+        }
+    }
+    val kType: KType = typeClass.createType()
+    val serializer = serializer(kType)
+
+    init {
+        // Prefill enum classes
+        if (typeClass.isSubclassOf(Enum::class)) {
+            val values = typeClass.java.enumConstants as Array<T>
+
+            choices(*values.map { value ->
+                Pair(value.toString(), value)
+            }.toTypedArray())
+        }
+    }
+
+    fun choices(vararg choices: Pair<String, T>): SerializableCommandOption<T> {
+        this.choices += choices.map {
+            Choice(it.first, Json.encodeToString(serializer, it.second))
         }
 
         return this

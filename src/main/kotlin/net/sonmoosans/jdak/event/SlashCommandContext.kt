@@ -1,7 +1,8 @@
 package net.sonmoosans.jdak.event
 
+import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.sonmoosans.jdak.command.CommandOption
+import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.sonmoosans.jdak.command.OptionsContainer
 import net.sonmoosans.jdak.command.TypedCommandOption
 
@@ -16,11 +17,14 @@ class SlashCommandContext(
         }
     }
 
-    val<T : Any?> TypedCommandOption<T>.value: T get() {
-        return options[name] as T
-    }
+    inline operator fun <reified T> TypedCommandOption<T>.invoke() = value()
 
-    inline fun<reified T> CommandOption.value(): T {
+
+    inline fun<reified T> TypedCommandOption<T>.value(): T {
+        if (this.type == OptionType.STRING) {
+            return Json.decodeFromString<T>(options[name] as String)
+        }
+
         return options[name] as T
     }
 }
