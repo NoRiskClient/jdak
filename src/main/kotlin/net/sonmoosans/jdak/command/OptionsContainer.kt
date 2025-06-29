@@ -1,5 +1,7 @@
 package net.sonmoosans.jdak.command
 
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import net.dv8tion.jda.api.entities.IMentionable
 import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.Role
@@ -17,12 +19,25 @@ interface OptionsContainer {
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T : Any> OptionsContainer.option(
+    serializer: DeserializationStrategy<T>,
+    name: String,
+    description: String,
+    noinline init: (SerializableCommandOption<T>.() -> Unit)? = null,
+): SerializableCommandOption<T> {
+    val option = SerializableCommandOption(name, description, T::class, serializer)
+    init?.invoke(option)
+    return addOption(option)
+}
+
+
 inline fun <reified T : Any> OptionsContainer.option(
     name: String,
     description: String,
     noinline init: (SerializableCommandOption<T>.() -> Unit)? = null,
 ): SerializableCommandOption<T> {
-    val option = SerializableCommandOption(name, description, T::class)
+    val option = SerializableCommandOption(name, description, T::class, null)
     init?.invoke(option)
     return addOption(option)
 }

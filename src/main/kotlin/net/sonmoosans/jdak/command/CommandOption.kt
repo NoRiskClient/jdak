@@ -1,5 +1,7 @@
 package net.sonmoosans.jdak.command
 
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import net.dv8tion.jda.api.entities.IMentionable
@@ -18,7 +20,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
@@ -53,7 +54,7 @@ open class StringCommandOption<T: Any?>(
 }
 
 open class SerializableCommandOption<T : Any>(
-    name: String, description: String, typeClass: KClass<T>
+    name: String, description: String, typeClass: KClass<T>, serializer: DeserializationStrategy<Any?>?
 ): TypedCommandOption<T>(name, description, getOptionType(typeClass)) {
     companion object {
         private fun getOptionType(type: KClass<*>): OptionType = when (type) {
@@ -70,8 +71,7 @@ open class SerializableCommandOption<T : Any>(
             else -> OptionType.STRING
         }
     }
-    val kType: KType = typeClass.createType()
-    val serializer = serializer(kType)
+    val serializer = (serializer ?: serializer(typeClass.createType())) as SerializationStrategy<T>
 
     init {
         // Prefill enum classes
