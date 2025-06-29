@@ -33,7 +33,7 @@ sealed class ContextCommand(val name: String, val type: Command.Type): Applicati
 class MessageContextCommand(name: String): ContextCommand(name, Command.Type.MESSAGE) {
     var handler: (MessageContextInteractionEvent) -> Unit = {}
 
-    fun onEvent(handler: (event: MessageContextInteractionEvent) -> Unit) {
+    fun runs(handler: (event: MessageContextInteractionEvent) -> Unit) {
         this.handler = handler
     }
 
@@ -45,7 +45,7 @@ class MessageContextCommand(name: String): ContextCommand(name, Command.Type.MES
 class UserContextCommand(name: String): ContextCommand(name, Command.Type.USER) {
     var handler: (event: UserContextInteractionEvent) -> Unit = {}
 
-    fun onEvent(handler: (event: UserContextInteractionEvent) -> Unit) {
+    fun runs(handler: (event: UserContextInteractionEvent) -> Unit) {
         this.handler = handler
     }
 

@@ -32,7 +32,6 @@ abstract class CommandRoute: OptionsContainer, CommandNode {
 
         for (option in options) {
             val handler = option.onAutoComplete?: continue
-
             builder.autocomplete(AutoCompleteKey(key, option.name), handler)
         }
     }
@@ -47,7 +46,7 @@ abstract class CommandRoute: OptionsContainer, CommandNode {
         this.filter = filter
     }
 
-    fun onEvent(handler: (@CommandDsl SlashCommandContext).() -> Unit) {
+    fun runs(handler: suspend (@CommandDsl SlashCommandContext).() -> Unit) {
         this.handler = handler
     }
 }
@@ -65,8 +64,8 @@ data class SlashCommand(
     override fun build(): CommandData {
         return CommandDataImpl(name, description)
             .setGuildOnly(guildOnly)
-            .setNameLocalizations(nameLocale?: mapOf())
-            .setDescriptionLocalizations(descriptionLocale?: mapOf())
+            .setNameLocalizations(nameLocale ?: mapOf())
+            .setDescriptionLocalizations(descriptionLocale ?: mapOf())
             .addOptions(options.map { it.build() })
             .addSubcommands(subcommands.map { it.build() })
             .addSubcommandGroups(subcommandGroups.map { it.build() })
@@ -108,8 +107,8 @@ data class SubCommandGroup(
     fun build(): SubcommandGroupData {
         return SubcommandGroupData(name, description)
             .addSubcommands(subcommands.map { it.build() })
-            .setNameLocalizations(nameLocale?: mapOf())
-            .setDescriptionLocalizations(descriptionLocale?: mapOf())
+            .setNameLocalizations(nameLocale ?: mapOf())
+            .setDescriptionLocalizations(descriptionLocale ?: mapOf())
     }
 }
 
@@ -120,8 +119,8 @@ data class SubCommand(
 
     fun build(): SubcommandData {
         return SubcommandData(name, description)
-            .setNameLocalizations(nameLocale?: mapOf())
-            .setDescriptionLocalizations(descriptionLocale?: mapOf())
+            .setNameLocalizations(nameLocale ?: mapOf())
+            .setDescriptionLocalizations(descriptionLocale ?: mapOf())
             .addOptions(options.map { it.build() })
     }
 }

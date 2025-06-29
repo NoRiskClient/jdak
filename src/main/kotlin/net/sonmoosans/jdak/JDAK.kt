@@ -13,14 +13,15 @@ data class CommandsBuild(
 )
 
 object JDAK {
+    val globalListener = CommandListenerBuilderImpl()
+
     private fun build(init: CommandBuilder.() -> Unit): CommandsBuild {
         val builder = CommandBuilder().apply(init)
         val commands = arrayListOf<CommandData>()
-        val listener = CommandListenerBuilderImpl()
 
-        builder.buildTo(commands, listener)
+        builder.buildTo(commands, globalListener)
 
-        return CommandsBuild(commands, listener.build())
+        return CommandsBuild(commands, globalListener.build())
     }
 
     fun guilds(jda: JDA, guilds: List<Guild>, init: CommandBuilder.() -> Unit) {
@@ -43,5 +44,9 @@ object JDAK {
             .queue()
 
         jda.addEventListener(data.listener)
+    }
+
+    fun registerListeners(jda: JDA) {
+        jda.addEventListener(globalListener.build())
     }
 }

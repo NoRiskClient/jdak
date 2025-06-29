@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
+import net.sonmoosans.jdak.JDAK
 import net.sonmoosans.jdak.command.*
 import net.sonmoosans.jdak.listener.CommandListenerBuilder
 
@@ -42,7 +43,7 @@ class CommandBuilder(val middleware: MiddlewareFn? = null) {
         command.nameLocalizations = nameLocalizations
         command.guildOnly = guildOnly
         command.permissions = permissions
-        command.onEvent(handler)
+        command.runs(handler)
 
         commands += command
         return command
@@ -72,7 +73,7 @@ class CommandBuilder(val middleware: MiddlewareFn? = null) {
         command.nameLocalizations = nameLocalizations
         command.guildOnly = guildOnly
         command.permissions = permissions
-        command.onEvent(handler)
+        command.runs(handler)
 
         commands += command
         return command
@@ -92,6 +93,12 @@ class CommandBuilder(val middleware: MiddlewareFn? = null) {
             child.buildTo(commands, listenerWithMiddleware?: listener)
         }
     }
+}
+
+fun slashcommand(name: String, description: String, @CommandDsl init: SlashCommand.() -> Unit): CommandData {
+    val command = SlashCommand(name, description).apply(init)
+    command.listen(JDAK.globalListener)
+    return command.build()
 }
 
 fun CommandGroup.subcommand(name: String, description: String, @CommandDsl init: SubCommand.() -> Unit): SubCommand {

@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.sonmoosans.jdak.event.SlashCommandContext
 
-typealias CommandHandler = SlashCommandContext.() -> Unit
+typealias CommandHandler = suspend SlashCommandContext.() -> Unit
 typealias AutoCompleteHandler = (CommandAutoCompleteInteractionEvent) -> Unit
 typealias MessageCommandHandler = (MessageContextInteractionEvent) -> Unit
 typealias UserCommandHandler = (UserContextInteractionEvent) -> Unit

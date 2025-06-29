@@ -3,14 +3,14 @@ package net.sonmoosans.jdak.builder
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.sonmoosans.jdak.listener.*
 
-typealias MiddlewareFn = (event: GenericInteractionCreateEvent, next: () -> Unit) -> Unit
+typealias MiddlewareFn = (event: GenericInteractionCreateEvent, next: suspend () -> Unit) -> Unit
 
-class MiddlewareListenerBuilder(val wrapper: MiddlewareFn, val builder: CommandListenerBuilder) : CommandListenerBuilder by builder {
-
+class MiddlewareListenerBuilder(val wrapper: MiddlewareFn, val builder: CommandListenerBuilder) :
+    CommandListenerBuilder by builder {
     override fun command(key: CommandKey, handler: CommandHandler) {
         builder.command(key) {
             wrapper(event) {
-                handler(this)
+                handler.invoke(this@command)
             }
         }
     }
@@ -18,7 +18,7 @@ class MiddlewareListenerBuilder(val wrapper: MiddlewareFn, val builder: CommandL
     override fun autocomplete(key: AutoCompleteKey, handler: AutoCompleteHandler) {
         builder.autocomplete(key) {
             wrapper(it) {
-                handler(it)
+                handler.invoke(it)
             }
         }
     }

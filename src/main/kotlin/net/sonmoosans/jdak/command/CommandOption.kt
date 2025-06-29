@@ -17,10 +17,11 @@ import net.dv8tion.jda.api.interactions.commands.Command.Choice
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.typeOf
+import kotlin.reflect.full.memberProperties
 
 open class StringCommandOption<T: Any?>(
     name: String, description: String
@@ -139,6 +140,14 @@ open class ChannelCommandOption<T : Any?>(
     }
 }
 
+class NullableTypedCommandOption<T: Any?>(
+    name: String, description: String, type: OptionType
+): TypedCommandOption<T>(name, description, type) {
+    init {
+        required = false
+    }
+}
+
 open class TypedCommandOption<T : Any?>(
     name: String, description: String, type: OptionType
 ): CommandOption(name, description, type) {
@@ -147,9 +156,10 @@ open class TypedCommandOption<T : Any?>(
         return this as TypedCommandOption<T & Any>
     }
 
-    fun optional(): TypedCommandOption<T?> {
+    fun optional(): NullableTypedCommandOption<T?> {
         required = false
-        return this as TypedCommandOption<T?>
+        val newOption = NullableTypedCommandOption<T?>(name, description, type)
+        return copyPropertiesTo(newOption)
     }
 
     fun autoComplete(v: Boolean = true): TypedCommandOption<T> {
@@ -312,4 +322,21 @@ open class CommandOption(
 
         return option
     }
+}
+
+private fun <T : CommandOption> CommandOption.copyPropertiesTo(target: T): T {
+    val sourceProps = this::class.memberProperties
+        .filterIsInstance<KMutableProperty1<CommandOption, Any?>>()
+
+    val targetProps = target::class.memberProperties
+        .filterIsInstance<KMutableProperty1<CommandOption, Any?>>()
+        .associateBy { it.name }
+
+    for (prop in sourceProps) {
+        val targetProp = targetProps[prop.name] ?: continue
+        val value = prop.get(this)
+        targetProp.set(target, value)
+    }
+
+    return target
 }
