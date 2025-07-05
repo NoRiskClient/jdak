@@ -233,12 +233,17 @@ open class TypedCommandOption<T : Any?>(
         descriptionLocalizations = localizations
         return this
     }
+
+    open suspend fun getValue(event: SlashCommandInteractionEvent, options: Map<String, Any?>): T {
+        return options[name] as T
+    }
 }
 
 open class CommandOption(
     val name: String, val description: String, val type: OptionType
 ) {
     var required: Boolean = true
+    var ignoreInCommandTree: Boolean = false
     var autoComplete: Boolean = false
     var onAutoComplete: ((event: CommandAutoCompleteInteractionEvent) -> Unit)? = null
 

@@ -66,7 +66,7 @@ data class SlashCommand(
             .setGuildOnly(guildOnly)
             .setNameLocalizations(nameLocale ?: mapOf())
             .setDescriptionLocalizations(descriptionLocale ?: mapOf())
-            .addOptions(options.map { it.build() })
+            .addOptions(options.mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() })
             .addSubcommands(subcommands.map { it.build() })
             .addSubcommandGroups(subcommandGroups.map { it.build() })
             .also { command ->
@@ -121,7 +121,7 @@ data class SubCommand(
         return SubcommandData(name, description)
             .setNameLocalizations(nameLocale ?: mapOf())
             .setDescriptionLocalizations(descriptionLocale ?: mapOf())
-            .addOptions(options.map { it.build() })
+            .addOptions(options.mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() })
     }
 }
 
