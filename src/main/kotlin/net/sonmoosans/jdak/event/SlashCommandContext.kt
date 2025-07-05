@@ -14,7 +14,7 @@ class SlashCommandContext(
 ) {
     val options = hashMapOf<String, Any?>()
 
-    fun parseOptions(command: OptionsContainer) {
+    suspend fun parseOptions(command: OptionsContainer) {
         for (option in command.options) {
             this.options[option.name] = option.parse(event)
         }

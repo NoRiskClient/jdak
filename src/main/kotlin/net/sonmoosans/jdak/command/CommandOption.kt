@@ -253,7 +253,7 @@ open class CommandOption(
     var nameLocalizations: Map<DiscordLocale, String>? = null
     var descriptionLocalizations: Map<DiscordLocale, String>? = null
 
-    open fun parse(event: SlashCommandInteractionEvent): Any? {
+    open suspend fun parse(event: SlashCommandInteractionEvent): Any? {
         val option = event.getOption(name)
         val parsed: Any? = when (option?.type) {
             OptionType.ATTACHMENT -> option.asAttachment
