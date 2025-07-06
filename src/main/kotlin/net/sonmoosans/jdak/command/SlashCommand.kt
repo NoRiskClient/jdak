@@ -11,7 +11,7 @@ import net.sonmoosans.jdak.event.SlashCommandContext
 import net.sonmoosans.jdak.listener.*
 
 @CommandDsl
-abstract class CommandRoute: OptionsContainer, CommandNode {
+abstract class CommandRoute : OptionsContainer, CommandNode {
     var nameLocale: Map<DiscordLocale, String>? = null
     var descriptionLocale: Map<DiscordLocale, String>? = null
     override val options = arrayListOf<CommandOption>()
@@ -31,7 +31,7 @@ abstract class CommandRoute: OptionsContainer, CommandNode {
         }
 
         for (option in options) {
-            val handler = option.onAutoComplete?: continue
+            val handler = option.onAutoComplete ?: continue
             builder.autocomplete(AutoCompleteKey(key, option.name), handler)
         }
     }
@@ -54,7 +54,7 @@ abstract class CommandRoute: OptionsContainer, CommandNode {
 data class SlashCommand(
     val name: String,
     val description: String,
-): CommandRoute(), ApplicationCommand, CommandGroup {
+) : CommandRoute(), ApplicationCommand, CommandGroup {
     override val subcommands = arrayListOf<SubCommand>()
     override var guildOnly: Boolean = false
     override var permissions: DefaultMemberPermissions? = null
@@ -66,7 +66,11 @@ data class SlashCommand(
             .setGuildOnly(guildOnly)
             .setNameLocalizations(nameLocale ?: mapOf())
             .setDescriptionLocalizations(descriptionLocale ?: mapOf())
-            .addOptions(options.mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() })
+            .addOptions(
+                options
+                    .mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() }
+                    .sortedBy { !it.isRequired }
+            )
             .addSubcommands(subcommands.map { it.build() })
             .addSubcommandGroups(subcommandGroups.map { it.build() })
             .also { command ->
@@ -98,8 +102,8 @@ data class SlashCommand(
 
 data class SubCommandGroup(
     val name: String,
-    val description: String
-): CommandGroup {
+    val description: String,
+) : CommandGroup {
     override val subcommands = arrayListOf<SubCommand>()
     var nameLocale: Map<DiscordLocale, String>? = null
     var descriptionLocale: Map<DiscordLocale, String>? = null
@@ -115,18 +119,22 @@ data class SubCommandGroup(
 data class SubCommand(
     val name: String,
     val description: String,
-): CommandRoute() {
+) : CommandRoute() {
 
     fun build(): SubcommandData {
         return SubcommandData(name, description)
             .setNameLocalizations(nameLocale ?: mapOf())
             .setDescriptionLocalizations(descriptionLocale ?: mapOf())
-            .addOptions(options.mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() })
+            .addOptions(
+                options
+                    .mapNotNull { it.takeIf { !it.ignoreInCommandTree }?.build() }
+                    .sortedBy { !it.isRequired }
+            )
     }
 }
 
 @CommandDsl
-interface CommandGroup: CommandNode {
+interface CommandGroup : CommandNode {
     val subcommands: MutableList<SubCommand>
 
     override fun listen(key: CommandKey, builder: CommandListenerBuilder) {
