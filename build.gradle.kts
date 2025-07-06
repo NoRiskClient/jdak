@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "gg.norisk"
-version = "2.0.0-SNAP-9"
+version = "2.0.0"
 description = "Powerful Discord bot Framework based on JDA for Kotlin"
 
 tasks {
